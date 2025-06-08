@@ -1,0 +1,251 @@
+# Hospital Microservice - Patient Service
+
+Arsitektur backend microservice untuk sistem rumah sakit dengan Golang, Fiber, dan SQL Server.
+
+## 🚀 Fitur Utama
+
+- **High Performance**: Menggunakan Fiber framework untuk performa maksimal
+- **Clean Architecture**: Domain-Driven Design dengan separation of concerns
+- **JWT Authentication**: Secure API dengan JWT token
+- **SQL Server**: Direct SQL queries tanpa ORM untuk kontrol penuh
+- **Monitoring**: Prometheus metrics dan health checks
+- **Docker Support**: Siap deploy dengan Docker dan Kubernetes
+- **Scalable**: Arsitektur microservice yang mudah di-scale
+
+## 📋 Prerequisites
+
+- Go 1.21 atau lebih baru
+- Docker dan Docker Compose
+- SQL Server (atau gunakan Docker)
+- Git
+
+## 🛠️ Quick Start
+
+### 1. Clone Repository
+```bash
+git clone <your-repo-url>
+cd hospital-microservices
+```
+
+### 2. Setup dengan Script
+```bash
+chmod +x scripts/setup.sh
+./scripts/setup.sh
+```
+
+### 3. Manual Setup (Alternatif)
+```bash
+# Masuk ke directory service
+cd services/patient-service
+
+# Copy environment file
+cp .env.example .env
+
+# Install dependencies
+go mod download
+
+# Run SQL Server dengan Docker
+docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=YourStrong@Passw0rd" \
+  -p 1433:1433 --name hospital_sqlserver \
+  -d mcr.microsoft.com/mssql/server:2019-latest
+
+# Run service
+go run cmd/main.go
+```
+
+### 4. Menggunakan Docker Compose
+```bash
+# Start semua services
+docker-compose up -d
+
+# Stop services
+docker-compose down
+```
+
+## 🔧 Konfigurasi
+
+Edit file `.env` untuk mengubah konfigurasi:
+
+```env
+# Application
+APP_NAME=patient-service
+APP_PORT=3001
+APP_ENV=development
+
+# Database
+DB_HOST=localhost
+DB_PORT=1433
+DB_USER=sa
+DB_PASSWORD=YourStrong@Passw0rd
+DB_NAME=hospital_patient_db
+
+# JWT
+JWT_SECRET=your-secret-key-change-this-in-production
+JWT_EXPIRE_HOURS=24
+```
+
+## 📡 API Endpoints
+
+### Health Check
+```
+GET /health
+```
+
+### Patient Endpoints (Protected)
+```
+POST   /api/v1/patients       - Create patient
+GET    /api/v1/patients/:id   - Get patient by ID
+PUT    /api/v1/patients/:id   - Update patient
+DELETE /api/v1/patients/:id   - Delete patient (soft delete)
+GET    /api/v1/patients       - List patients (with pagination)
+```
+
+### Public Endpoints
+```
+GET    /api/v1/patients/:id/public - Get patient public info
+```
+
+### Metrics
+```
+GET    /metrics - Prometheus metrics
+```
+
+## 🧪 Testing
+
+### Run Tests
+```bash
+go test ./...
+```
+
+### Test with Coverage
+```bash
+go test -cover ./...
+```
+
+### Example cURL Commands
+
+**Get JWT Token (dari auth-service):**
+```bash
+curl -X POST http://localhost:3000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+```
+
+**Create Patient:**
+```bash
+curl -X POST http://localhost:3001/api/v1/patients \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nik": "1234567890123456",
+    "first_name": "John",
+    "last_name": "Doe",
+    "date_of_birth": "1990-01-01T00:00:00Z",
+    "gender": "MALE",
+    "phone": "081234567890",
+    "email": "john.doe@example.com",
+    "address": "Jl. Sudirman No. 1",
+    "city": "Jakarta",
+    "province": "DKI Jakarta"
+  }'
+```
+
+**Get Patient:**
+```bash
+curl -X GET http://localhost:3001/api/v1/patients/PATIENT_ID \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**List Patients with Pagination:**
+```bash
+curl -X GET "http://localhost:3001/api/v1/patients?page=1&limit=10&search=john" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+## 🏗️ Development
+
+### Hot Reload dengan Air
+```bash
+# Install air
+go install github.com/cosmtrek/air@latest
+
+# Run dengan hot reload
+air
+```
+
+### Generate Swagger Documentation
+```bash
+swag init -g ./cmd/main.go -o ./docs
+```
+
+### Build Binary
+```bash
+make build
+```
+
+### Build Docker Image
+```bash
+make docker-build
+```
+
+## 📊 Monitoring
+
+### Prometheus
+Access: http://localhost:9090
+
+### Grafana
+Access: http://localhost:3000
+Default login: admin/admin
+
+### Metrics yang Tersedia:
+- `http_requests_total` - Total HTTP requests
+- `http_request_duration_seconds` - Request duration
+- `http_active_connections` - Active connections
+
+## 🚀 Production Deployment
+
+### Kubernetes
+```bash
+# Apply configurations
+kubectl apply -f kubernetes/patient-service/
+
+# Check status
+kubectl get pods -n hospital-system
+```
+
+### Best Practices untuk Production:
+1. **Environment Variables**: Gunakan Kubernetes Secrets
+2. **Database**: Gunakan managed SQL Server (Azure SQL, AWS RDS)
+3. **Monitoring**: Setup Prometheus + Grafana + Alertmanager
+4. **Logging**: Centralized logging dengan ELK Stack
+5. **Security**: 
+   - Update JWT secret
+   - Enable TLS/SSL
+   - Network policies
+   - Rate limiting
+
+## 🔐 Security Considerations
+
+1. **JWT Secret**: Ganti default secret di production
+2. **Database Password**: Gunakan password yang kuat
+3. **Input Validation**: Semua input divalidasi
+4. **SQL Injection**: Menggunakan parameterized queries
+5. **CORS**: Configure sesuai domain yang diizinkan
+
+## 🤝 Contributing
+
+1. Fork repository
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
+
+## 📝 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## 📞 Contact
+
+Your Name - [@yourtwitter](https://twitter.com/yourtwitter) - email@example.com
+
+Project Link: [https://github.com/yourusername/hospital-microservices](https://github.com/yourusername/hospital-microservices)
